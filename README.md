@@ -94,6 +94,12 @@ Venezuela) on a custom domain.
 3. Set the build command to `pnpm build` (webpack).
 4. Point the domain through Cloudflare (proxied) for caching + access.
 
+**Region:** `vercel.json` pins functions to `iad1` (US-East). Venezuela's
+internet backhauls north through Miami, so US-East beats São Paulo in practice.
+Create the **Supabase** project in **East US (North Virginia / `us-east-1`)** to
+co-locate it with the functions — SSR hits the DB per request, so same-region
+keeps that hop ~1–5 ms. (Supabase region is fixed at project creation.)
+
 ## Project conventions
 
 See [`CLAUDE.md`](./CLAUDE.md) (workflow + atomic component architecture,
