@@ -12,6 +12,8 @@ function rateLimited(ip: string, max = 20, windowMs = 60_000): boolean {
   const a = (hits.get(ip) ?? []).filter((t) => now - t < windowMs);
   a.push(now);
   hits.set(ip, a);
+  // Prune empty entries so the Map doesn't accumulate one key per unique IP forever.
+  for (const [k, ts] of hits) if (ts.every((t) => now - t >= windowMs)) hits.delete(k);
   return a.length > max;
 }
 
@@ -23,7 +25,7 @@ function rateLimited(ip: string, max = 20, windowMs = 60_000): boolean {
  */
 export async function POST(req: Request): Promise<Response> {
   const body = (await req.json().catch(() => null)) as Body | null;
-  if (!body?.clientUuid || (body.kind !== "report" && body.kind !== "note")) {
+  if (typeof body?.clientUuid !== "string" || (body.kind !== "report" && body.kind !== "note")) {
     return new Response("bad request", { status: 400 });
   }
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
