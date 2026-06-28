@@ -6,17 +6,23 @@ import { FilterBar } from "@/components/molecules/filter-bar";
 import { PublicReportCard } from "@/components/molecules/public-report-card";
 import { ReportCardBones } from "@/components/ui/loading-bones";
 import { fetchReports, subscribeReports, type PublicReport } from "@/lib/feed";
+import { fetchHubReports } from "@/lib/hub-feed";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { REPORT_TYPE_ORDER } from "@/lib/report-types";
 import { useT } from "@/lib/i18n/client";
 import type { ReportType } from "@/lib/types";
 
 const PAGE = 20;
+/** Hub section fetches at most this many reports per type (5 types × 20 = 100 max). */
+const HUB_LIMIT = 20;
 
 /**
  * Public discovery feed: newest-first list of verified reports with type
  * filters, keyset "load more" pagination, and live updates via Supabase
- * Realtime. List-first by design (the low-bandwidth default).
+ * Realtime. Below the local feed a dedicated section surfaces the latest
+ * reports from the venezuela-ayuda national hub.
+ *
+ * @client-component Owns filter state and async data fetching.
  */
 export function ReportFeed() {
   const t = useT();
@@ -26,6 +32,10 @@ export function ReportFeed() {
   const [reports, setReports] = useState<PublicReport[] | null>(null);
   const [done, setDone] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  // Hub section state: null = loading, [] = empty/error, [...] = loaded.
+  const [hubReports, setHubReports] = useState<PublicReport[] | null>(null);
+
   // Monotonic request token — only the latest fetch may commit, so rapid filter
   // toggles / realtime pings can't race. setState runs only after the await
   // (the previous list stays visible while refreshing).
@@ -57,6 +67,21 @@ export function ReportFeed() {
     return unsubscribe;
   }, [loadFirst]);
 
+  // Hub section: fetched once on mount (hub has no realtime subscription).
+  // Runs independently of the local feed so a hub outage never blocks local
+  // report display. eslint-disable comment is required: setState is called
+  // after an await inside the effect, which is the intentional pattern here.
+  useEffect(() => {
+    let active = true;
+    void fetchHubReports({ limit: HUB_LIMIT }).then((data) => {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (active) setHubReports(data);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   async function loadMore() {
     if (!reports?.length) return;
     setLoadingMore(true);
@@ -84,6 +109,7 @@ export function ReportFeed() {
         </p>
       )}
 
+      {/* ── Local reports ── */}
       <div className="mt-4 space-y-3">
         {reports === null ? (
           [0, 1, 2].map((i) => (
@@ -112,6 +138,33 @@ export function ReportFeed() {
           </Button>
         </div>
       )}
+
+      {/* ── National hub section ── */}
+      <section aria-label={t("feed.hubSection")} className="mt-8">
+        <h2 className="mb-3 text-h3 text-ink-soft flex items-center gap-2">
+          <span aria-hidden="true">🌐</span>
+          {t("feed.hubSection")}
+        </h2>
+
+        {hubReports === null ? (
+          // Loading state: reuse the same skeleton as local cards.
+          [0, 1, 2].map((i) => (
+            <ReportCardBones key={i} loading>
+              <div />
+            </ReportCardBones>
+          ))
+        ) : hubReports.length === 0 ? (
+          <p className="rounded-lg border border-hairline-soft bg-surface p-6 text-center text-body">
+            {t("feed.hubEmpty")}
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {hubReports.map((r) => (
+              <PublicReportCard key={r.id} report={r} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
