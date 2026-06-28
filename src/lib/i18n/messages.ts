@@ -154,6 +154,7 @@ const es = {
   "admin.findDup": "Buscar duplicados",
   "admin.dupNone": "Sin duplicados.",
   "admin.dupPrompt": "Marcar este reporte como duplicado de:",
+  "admin.reExtract": "Re-extraer",
 
   "offlinePage.title": "Sin conexión",
   "offlinePage.body":
@@ -311,6 +312,7 @@ const en: Record<keyof typeof es, string> = {
   "admin.findDup": "Find duplicates",
   "admin.dupNone": "No duplicates.",
   "admin.dupPrompt": "Mark this report as a duplicate of:",
+  "admin.reExtract": "Re-extract",
 
   "offlinePage.title": "Offline",
   "offlinePage.body":

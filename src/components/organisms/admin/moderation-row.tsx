@@ -121,6 +121,20 @@ export function ModerationRow({
         <ActButton busy={busy} onClick={findDuplicates}>
           {t("admin.findDup")}
         </ActButton>
+        <ActButton
+          busy={busy}
+          onClick={() =>
+            act(async () => {
+              await fetch("/api/extract?force=1", {
+                method: "POST",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify({ kind: "report", clientUuid: report.clientUuid }),
+              });
+            })
+          }
+        >
+          {t("admin.reExtract")}
+        </ActButton>
       </div>
 
       {dups &&
