@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/atoms/button";
 import { TextField } from "./text-field";
+import { LocationMapPicker } from "./location-map-picker";
 import { useT } from "@/lib/i18n/client";
 
 export interface LocationValue {
@@ -27,6 +28,7 @@ export function LocationPicker({
   const t = useT();
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string>();
+  const [mapOpen, setMapOpen] = useState(false);
   const hasCoords = value.lat != null && value.lng != null;
 
   async function requestLocation() {
@@ -85,6 +87,13 @@ export function LocationPicker({
         >
           📍 {locating ? t("report.locating") : t("report.useLocation")}
         </Button>
+        <Button
+          variant="secondary"
+          onClick={() => setMapOpen((open) => !open)}
+          aria-expanded={mapOpen}
+        >
+          🗺 {t("report.pickOnMap")}
+        </Button>
         {hasCoords && (
           <span className="inline-flex items-center gap-2 text-caption text-ink-soft">
             <span aria-hidden="true">✓</span>
@@ -104,6 +113,19 @@ export function LocationPicker({
         <p className="mt-1 text-caption text-danger" role="alert">
           {geoError}
         </p>
+      )}
+
+      {mapOpen && (
+        <>
+          <p className="mt-2 text-caption text-ink-muted">
+            {t("report.mapHint")}
+          </p>
+          <LocationMapPicker
+            lat={value.lat}
+            lng={value.lng}
+            onPick={(la, ln) => onChange({ ...value, lat: la, lng: ln })}
+          />
+        </>
       )}
 
       <div className="mt-3">
