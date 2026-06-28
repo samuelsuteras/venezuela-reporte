@@ -96,10 +96,12 @@ async function syncOne(
         ? `SRID=4326;POINT(${report.lng} ${report.lat})`
         : null;
 
-    // ignoreDuplicates → INSERT ... ON CONFLICT DO NOTHING. Keeps RLS to
-    // INSERT-only and makes a retry after a dropped response a no-op (the row
-    // already exists). On a duplicate, `data` is null — that's still success.
-    const { data, error } = await supabase
+    // ignoreDuplicates → INSERT ... ON CONFLICT DO NOTHING. No .select(): anon
+    // has no SELECT policy on `reports` (public reads go through the
+    // reports_public view), so a RETURNING/representation would be rejected by
+    // RLS (42501). return=minimal inserts cleanly; a retry on a dropped
+    // response is a harmless no-op.
+    const { error } = await supabase
       .from("reports")
       .upsert(
         {
@@ -113,15 +115,12 @@ async function syncOne(
           image_paths: imagePaths,
         },
         { onConflict: "client_uuid", ignoreDuplicates: true },
-      )
-      .select("id")
-      .maybeSingle();
+      );
     if (error) throw error;
 
     await db.outbox.update(report.clientUuid, {
       status: "synced",
       syncedAt: Date.now(),
-      remoteId: data?.id as string | undefined,
       error: undefined,
     });
     log("sync", "synced", report.clientUuid);
