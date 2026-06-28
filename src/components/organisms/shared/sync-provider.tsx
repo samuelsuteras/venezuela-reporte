@@ -19,9 +19,14 @@ export function SyncProvider() {
     const onVisible = () => {
       if (document.visibilityState === "visible") void flushOutbox();
     };
+    // Periodic safety net: retry every 30s so an unsynced report (or one
+    // orphaned by a refresh) eventually goes out. flushOutbox no-ops cheaply
+    // when offline / unconfigured / nothing queued.
+    const interval = setInterval(() => void flushOutbox(), 30_000);
     window.addEventListener("online", onOnline);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
+      clearInterval(interval);
       window.removeEventListener("online", onOnline);
       document.removeEventListener("visibilitychange", onVisible);
     };

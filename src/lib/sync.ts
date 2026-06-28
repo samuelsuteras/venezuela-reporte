@@ -42,9 +42,12 @@ export async function flushOutbox(): Promise<void> {
   flushing = true;
   let syncedCount = 0;
   try {
+    // Include "syncing": a report left in that state was orphaned by a refresh
+    // or closed tab mid-send. Re-sending is safe (idempotent upsert), so we
+    // always recover it instead of leaving it stuck forever.
     const queued = await db.outbox
       .where("status")
-      .anyOf("pending", "error")
+      .anyOf("pending", "error", "syncing")
       .sortBy("createdAt");
     log("sync", `flushing ${queued.length} queued report(s)`);
 

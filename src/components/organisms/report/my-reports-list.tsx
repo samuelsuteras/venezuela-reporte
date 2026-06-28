@@ -17,7 +17,10 @@ export function MyReportsList() {
   const t = useT();
   const reports = useMyReports();
   const hasUnsynced = (reports ?? []).some(
-    (r) => r.status === "pending" || r.status === "error",
+    (r) =>
+      r.status === "pending" ||
+      r.status === "error" ||
+      r.status === "syncing",
   );
 
   let content;

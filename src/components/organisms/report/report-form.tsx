@@ -29,21 +29,22 @@ export function ReportForm() {
   const [phone, setPhone] = useState("");
   const [images, setImages] = useState<Blob[]>([]);
   const [location, setLocation] = useState<LocationValue>({});
-  const [errors, setErrors] = useState<{ type?: string; title?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string }>({});
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const next: typeof errors = {};
-    if (!type) next.type = t("report.errType");
-    if (title.trim().length < 3) next.title = t("report.errTitle");
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
+    // Title is the only required field. Type defaults to "info" if not picked.
+    if (title.trim().length < 3) {
+      setErrors({ title: t("report.errTitle") });
+      return;
+    }
+    setErrors({});
 
     setSubmitting(true);
     try {
       await enqueueReport({
-        type: type!,
+        type: type ?? "info",
         title: title.trim(),
         description: description.trim() || undefined,
         contactPhone: phone.trim() || undefined,
@@ -62,14 +63,7 @@ export function ReportForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      <ReportTypeSelector
-        value={type}
-        error={errors.type}
-        onChange={(t) => {
-          setType(t);
-          setErrors((e) => ({ ...e, type: undefined }));
-        }}
-      />
+      <ReportTypeSelector value={type} onChange={setType} />
 
       <TextField
         id="title"

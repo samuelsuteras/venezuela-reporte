@@ -48,7 +48,8 @@ export function useMyReports(): OutboxReport[] | undefined {
 export function usePendingCount(): number {
   return (
     useLiveQuery(
-      () => db.outbox.where("status").anyOf("pending", "error").count(),
+      () =>
+        db.outbox.where("status").anyOf("pending", "error", "syncing").count(),
       [],
       0,
     ) ?? 0

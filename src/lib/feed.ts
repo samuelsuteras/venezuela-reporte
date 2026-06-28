@@ -1,4 +1,5 @@
 import { getSupabase, REPORT_IMAGES_BUCKET } from "./supabase";
+import { logError } from "./log";
 import type { ReportType } from "./types";
 
 /** A publicly-visible report (verified/resolved), as exposed by the
@@ -87,7 +88,10 @@ export async function fetchReportById(
     .select(COLUMNS)
     .eq("id", id)
     .maybeSingle();
-  if (error) throw error;
+  if (error) {
+    logError("feed", "fetchReportById failed", id, error.message);
+    throw error;
+  }
   return data ? toReport(data as unknown as PublicRow) : null;
 }
 
