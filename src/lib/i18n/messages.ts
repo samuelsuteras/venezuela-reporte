@@ -91,6 +91,9 @@ const es = {
   "feed.noBackend":
     "Conecta Supabase para ver los reportes públicos. Mientras tanto puedes crear reportes; se guardan en tu teléfono.",
   "feed.empty": "No hay reportes para mostrar.",
+  "feed.hubSection": "Hub nacional — Venezuela Ayuda",
+  "feed.hubBadge": "Hub",
+  "feed.hubEmpty": "Sin datos del hub en este momento.",
   "filter.label": "Filtrar por tipo",
 
   "detail.resolved": "✓ Resuelto",
@@ -232,6 +235,9 @@ const en: Record<keyof typeof es, string> = {
   "feed.noBackend":
     "Connect Supabase to see public reports. Meanwhile you can create reports; they're saved on your phone.",
   "feed.empty": "No reports to show.",
+  "feed.hubSection": "National hub — Venezuela Ayuda",
+  "feed.hubBadge": "Hub",
+  "feed.hubEmpty": "No hub data at this time.",
   "filter.label": "Filter by type",
 
   "detail.resolved": "✓ Resolved",

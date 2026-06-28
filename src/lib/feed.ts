@@ -3,7 +3,11 @@ import { logError } from "./log";
 import type { ReportType } from "./types";
 
 /** A publicly-visible report (verified/resolved), as exposed by the
- * `reports_public` view. Never includes contact_phone. */
+ * `reports_public` view. Never includes contact_phone.
+ *
+ * `source` distinguishes locally-stored reports ("local") from reports pulled
+ * from the venezuela-ayuda national hub ("hub"). Hub reports must NOT be
+ * linked to local detail pages — use `sourceUrl` for external attribution. */
 export interface PublicReport {
   id: string;
   type: ReportType;
@@ -16,6 +20,10 @@ export interface PublicReport {
   imagePaths: string[];
   createdAt: string;
   contactPhone: string | null;
+  /** "local" = from our Supabase; "hub" = from the national hub API. */
+  source?: "local" | "hub";
+  /** For hub reports: canonical URL of the source record. Open externally. */
+  sourceUrl?: string | null;
 }
 
 interface PublicRow {
@@ -48,6 +56,8 @@ function toReport(r: PublicRow): PublicReport {
     imagePaths: r.image_paths ?? [],
     createdAt: r.created_at,
     contactPhone: r.contact_phone,
+    source: "local",
+    sourceUrl: null,
   };
 }
 
