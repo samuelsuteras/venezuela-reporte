@@ -49,14 +49,15 @@ export async function addNote(reportId: string, body: string): Promise<void> {
 export function useNotes(reportId: string): PublicNote[] | undefined {
   const [notes, setNotes] = useState<PublicNote[] | undefined>(undefined);
   useEffect(() => {
+    let active = true;
     const supabase = getSupabase();
     if (!supabase) {
       // Defer so setState is not called synchronously in the effect body
-      // (avoids react-hooks/set-state-in-effect cascade-render lint error).
-      void Promise.resolve().then(() => setNotes([]));
-      return;
+      // (avoids react-hooks/set-state-in-effect cascade-render lint error);
+      // guard with `active` so an unmount in the microtask window is a no-op.
+      void Promise.resolve().then(() => { if (active) setNotes([]); });
+      return () => { active = false; };
     }
-    let active = true;
     const load = () =>
       supabase
         .from("report_notes_public")
