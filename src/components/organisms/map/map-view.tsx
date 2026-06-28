@@ -15,6 +15,7 @@ import {
   subscribeReports,
   type PublicReport,
 } from "@/lib/feed";
+import { fetchHubReports } from "@/lib/hub-feed";
 import { REPORT_TYPE_ORDER } from "@/lib/report-types";
 import {
   DEFAULT_CENTER,
@@ -27,6 +28,12 @@ import type { ReportType } from "@/lib/types";
 
 const SOURCE_ID = "reports";
 
+/**
+ * Build a GeoJSON FeatureCollection from local + hub reports, filtered by the
+ * active type set. Only reports with coordinates are included (enforced by both
+ * fetch calls). The `source` property on each feature lets the click handler
+ * distinguish hub markers (no local detail page) from local ones.
+ */
 function toFeatureCollection(
   reports: PublicReport[],
   types: Set<ReportType>,
@@ -38,7 +45,12 @@ function toFeatureCollection(
       .map((r) => ({
         type: "Feature",
         geometry: { type: "Point", coordinates: [r.lng!, r.lat!] },
-        properties: { id: r.id, type: r.type, title: r.title },
+        properties: {
+          id: r.id,
+          type: r.type,
+          title: r.title,
+          source: r.source ?? "local",
+        },
       })),
   };
 }
@@ -46,21 +58,36 @@ function toFeatureCollection(
 /**
  * Map of public reports. Clustered, color-coded by type. Built on MapLibre GL
  * (dynamically imported, browser-only). Basemap comes from a configured style
- * URL or a blank fallback (see map-style.ts). The list/feed is the accessible
- * equivalent — keyboard users reach reports there (DESIGN.md § Accessibility).
+ * URL or a blank fallback (see map-style.ts).
+ *
+ * Reports come from two sources merged into one GeoJSON layer:
+ *   - Local Supabase (real-time subscription)
+ *   - Venezuela-ayuda national hub (polled once on mount; no real-time)
+ *
+ * Hub markers are displayed identically to local ones but clicking them does
+ * NOT navigate to a local detail page (their UUIDs belong to the hub's DB).
+ * The list/feed is the accessible equivalent — keyboard users reach reports
+ * there (DESIGN.md § Accessibility).
+ *
+ * @client-component Owns map lifecycle, report refs, and filter state.
  */
 export function MapView() {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
+  // All reports (local + hub) merged. Updated by both load paths.
   const reportsRef = useRef<PublicReport[]>([]);
+  // Separate refs for each source so we can merge without one overwriting the other.
+  const localRef = useRef<PublicReport[]>([]);
+  const hubRef = useRef<PublicReport[]>([]);
   const [selected, setSelected] = useState<Set<ReportType>>(
     new Set(REPORT_TYPE_ORDER),
   );
   const selectedRef = useRef(selected);
 
-  // Push current reports + filter into the map source.
+  /** Merge local + hub into reportsRef and push to the map source. */
   const applyData = useCallback(() => {
+    reportsRef.current = [...localRef.current, ...hubRef.current];
     const source = mapRef.current?.getSource(SOURCE_ID) as
       | GeoJSONSource
       | undefined;
@@ -190,10 +217,16 @@ export function MapView() {
             });
           });
         });
+
         map.on("click", "points", (e) => {
-          const id = e.features?.[0]?.properties?.id as string | undefined;
-          if (id) router.push(`/reportes/${id}`);
+          const props = e.features?.[0]?.properties;
+          const id = props?.id as string | undefined;
+          const reportSource = props?.source as string | undefined;
+          // Hub report UUIDs belong to the hub's database — navigating to a
+          // local detail page would 404. Skip navigation for hub markers.
+          if (id && reportSource !== "hub") router.push(`/reportes/${id}`);
         });
+
         for (const layer of ["clusters", "points"]) {
           map.on("mouseenter", layer, () => {
             if (map) map.getCanvas().style.cursor = "pointer";
@@ -212,14 +245,14 @@ export function MapView() {
     };
   }, [router, applyData]);
 
-  // Load report data + subscribe to realtime changes.
+  // Load local report data + subscribe to realtime changes.
   useEffect(() => {
     let active = true;
     const load = () =>
       fetchReports({ withCoordsOnly: true, limit: 500 })
         .then((reports) => {
           if (!active) return;
-          reportsRef.current = reports;
+          localRef.current = reports;
           applyData();
         })
         .catch(() => {});
@@ -228,6 +261,23 @@ export function MapView() {
     return () => {
       active = false;
       unsubscribe();
+    };
+  }, [applyData]);
+
+  // Load hub reports once on mount (hub has no realtime channel).
+  // Hub fetch runs independently so a hub outage never affects local markers.
+  useEffect(() => {
+    let active = true;
+    void fetchHubReports({ withCoordsOnly: true, limit: 200 }).then(
+      (reports) => {
+        if (!active) return;
+        hubRef.current = reports;
+        applyData();
+        log("map", `hub: ${reports.length} markers loaded`);
+      },
+    );
+    return () => {
+      active = false;
     };
   }, [applyData]);
 
