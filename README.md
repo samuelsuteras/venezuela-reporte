@@ -62,6 +62,22 @@ Set `NEXT_PUBLIC_MAP_STYLE_URL` to a full MapLibre style — e.g. a self-hosted
 [Protomaps](https://protomaps.com) `.pmtiles` of Venezuela with
 `protomaps-themes-base`. Without it, the map shows markers on a blank background.
 
+### Hub integration (optional)
+
+The map and feed pull additional public reports from the
+[Venezuela Ayuda national hub](https://terremoto.hazlohoy.org) — a shared
+data hub that aggregates reports from partner organizations.  The GET endpoint
+is open (no API key) so this works out of the box.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_HUB_API_URL` | `https://terremoto.hazlohoy.org` | Override for a staging or self-hosted hub |
+
+Hub reports appear with a **Hub** badge in the feed and as color-coded markers
+on the map.  Clicking a hub marker on the map does not navigate to a local
+detail page (the UUIDs belong to the hub's database); cards with a `source_url`
+open the original source externally.
+
 ## Internationalization
 
 Spanish is the default; an EN/ES toggle in the header persists the choice in a
