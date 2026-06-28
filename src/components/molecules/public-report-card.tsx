@@ -9,8 +9,13 @@ import { useSaveData } from "@/lib/use-save-data";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
- * A public report in the discovery feed. Links to its detail page. The
- * thumbnail is dropped on data-saver/slow connections (DESIGN.md § Low-Bandwidth).
+ * A public report in the discovery feed. Local reports link to their detail
+ * page. Hub reports (source === "hub") are non-navigable locally; if they carry
+ * a `sourceUrl` they open the original source externally instead.
+ *
+ * The thumbnail is dropped on data-saver/slow connections (DESIGN.md § Low-Bandwidth).
+ *
+ * @server-component No — owns no state; but uses hooks from use-client parents.
  */
 export function PublicReportCard({ report }: { report: PublicReport }) {
   const t = useT();
@@ -22,11 +27,10 @@ export function PublicReportCard({ report }: { report: PublicReport }) {
       ? reportImageUrl(report.imagePaths[0])
       : null;
 
-  return (
-    <Link
-      href={`/reportes/${report.id}`}
-      className={`flex gap-3 rounded-lg border border-hairline-soft border-l-4 bg-canvas p-4 ${meta.accent}`}
-    >
+  const isHub = report.source === "hub";
+
+  const inner = (
+    <>
       {thumb && (
         // eslint-disable-next-line @next/next/no-img-element -- remote Supabase asset; next/image domain config deferred
         <img
@@ -36,10 +40,15 @@ export function PublicReportCard({ report }: { report: PublicReport }) {
           className="size-16 shrink-0 rounded-md object-cover"
         />
       )}
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
           <TypePin type={report.type} />
           <span className={`text-label ${meta.text}`}>{t(meta.labelKey)}</span>
+          {isHub && (
+            <span className="rounded-pill bg-surface px-2 py-0.5 text-caption text-ink-muted border border-hairline">
+              {t("feed.hubBadge")}
+            </span>
+          )}
           {report.status === "resolved" && (
             <span className="rounded-pill bg-surface px-2 py-0.5 text-caption text-status-synced">
               {t("detail.resolved")}
@@ -57,6 +66,34 @@ export function PublicReportCard({ report }: { report: PublicReport }) {
           {report.addressText ? ` · ${report.addressText}` : ""}
         </div>
       </div>
+    </>
+  );
+
+  const baseClass = `flex gap-3 rounded-lg border border-hairline-soft border-l-4 bg-canvas p-4 ${meta.accent}`;
+
+  // Hub report with a source URL: link externally (new tab, rel=noopener).
+  if (isHub && report.sourceUrl) {
+    return (
+      <a
+        href={report.sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={baseClass}
+      >
+        {inner}
+      </a>
+    );
+  }
+
+  // Hub report without a source URL: non-interactive card.
+  if (isHub) {
+    return <div className={baseClass}>{inner}</div>;
+  }
+
+  // Local report: link to the local detail page.
+  return (
+    <Link href={`/reportes/${report.id}`} className={baseClass}>
+      {inner}
     </Link>
   );
 }
