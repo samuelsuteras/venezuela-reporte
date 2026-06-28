@@ -41,14 +41,30 @@ const COLUMNS =
 // Full cédula public from day one. Flip NEXT_PUBLIC_EXTRACT_CEDULA_FULL=false to mask.
 const CEDULA_FULL = process.env.NEXT_PUBLIC_EXTRACT_CEDULA_FULL !== "false";
 
-/** Mask all but the prefix + first 3 digits of a normalized cédula (`V-123#####`). */
+/**
+ * Mask all but the prefix + first 3 digits of a normalized cédula
+ * (e.g. `V-123#####`).
+ *
+ * **DISPLAY-ONLY.** The full cédula is present in the `reports_public` and
+ * `report_notes_public` view payloads by product design (full-public). This
+ * function is a cosmetic display lever — it does NOT restrict access to the
+ * underlying data. Flip `NEXT_PUBLIC_EXTRACT_CEDULA_FULL=false` to activate it.
+ */
 export function maskCedula(c: string): string {
   const m = /^([VEJPG])-(\d{3})(\d+)$/.exec(c);
   if (!m) return c;
   return `${m[1]}-${m[2]}${"#".repeat(m[3].length)}`;
 }
 
-/** Apply the public cédula visibility policy to an extraction result. */
+/**
+ * Apply the public cédula visibility policy to an extraction result.
+ *
+ * **DISPLAY-ONLY — not an access control.** The full cédula is present in the
+ * `reports_public` and `report_notes_public` view payloads by design (full-public
+ * product decision). This function only masks the string for on-screen display
+ * when `NEXT_PUBLIC_EXTRACT_CEDULA_FULL=false`; the raw data remains accessible
+ * via the public view. Default: full cédula shown.
+ */
 export function applyCedulaPolicy(e: Extracted): Extracted {
   if (CEDULA_FULL) return e;
   return { ...e, cedulas: e.cedulas.map(maskCedula) };

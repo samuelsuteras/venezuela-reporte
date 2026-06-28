@@ -101,8 +101,9 @@ with (security_invoker = true) as
     st_y(r.location::geometry) as lat,
     st_x(r.location::geometry) as lng,
     r.address_text, r.status, r.contact_phone, r.image_paths,
-    r.duplicate_of, r.created_at, r.extracted,
+    r.duplicate_of, r.created_at,
     (select count(distinct f.client_uuid)
-       from public.report_flags f where f.report_id = r.id) as flag_count
+       from public.report_flags f where f.report_id = r.id) as flag_count,
+    r.extracted
   from public.reports r;
 grant select on public.reports_moderation to authenticated;

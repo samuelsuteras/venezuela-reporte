@@ -14,6 +14,7 @@ import {
   restoreReport,
   type ModReport,
 } from "@/lib/moderation";
+import { getSupabase } from "@/lib/supabase";
 
 function ActButton({
   children,
@@ -125,9 +126,13 @@ export function ModerationRow({
           busy={busy}
           onClick={() =>
             act(async () => {
+              const { data: { session } } = await getSupabase()!.auth.getSession();
               await fetch("/api/extract?force=1", {
                 method: "POST",
-                headers: { "content-type": "application/json" },
+                headers: {
+                  "content-type": "application/json",
+                  Authorization: `Bearer ${session?.access_token ?? ""}`,
+                },
                 body: JSON.stringify({ kind: "report", clientUuid: report.clientUuid }),
               });
             })

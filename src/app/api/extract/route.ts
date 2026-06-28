@@ -36,7 +36,24 @@ export async function POST(req: Request): Promise<Response> {
 
   const table = body.kind === "report" ? "reports" : "report_notes";
   const textCol = body.kind === "report" ? "description" : "body";
-  const force = new URL(req.url).searchParams.get("force") === "1";
+  const forceRequested = new URL(req.url).searchParams.get("force") === "1";
+
+  // Gate force-re-extraction behind a moderator check to prevent unauthenticated
+  // callers from bypassing the extracted_at idempotency guard and burning LLM quota.
+  let force = false;
+  if (forceRequested) {
+    const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+    if (!token) return new Response("forbidden", { status: 403 });
+    const { data: { user } } = await admin.auth.getUser(token);
+    if (!user) return new Response("forbidden", { status: 403 });
+    const { data: modRow } = await admin
+      .from("moderators")
+      .select("user_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (!modRow) return new Response("forbidden", { status: 403 });
+    force = true;
+  }
 
   const { data, error } = await admin
     .from(table)
