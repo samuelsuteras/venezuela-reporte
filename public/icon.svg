@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Reporte VE">
+  <path d="M256 64C168 64 100 132 100 220c0 92 100 172 156 228 56-56 156-136 156-228 0-88-68-156-156-156z" fill="#0f1722"/>
+  <rect x="186" y="136" width="64" height="64" rx="14" fill="#d32029"/>
+  <rect x="262" y="136" width="64" height="64" rx="14" fill="#f59e0b"/>
+  <rect x="186" y="212" width="64" height="64" rx="14" fill="#1d4ed8"/>
+  <rect x="262" y="212" width="64" height="64" rx="14" fill="#64748b"/>
+</svg>

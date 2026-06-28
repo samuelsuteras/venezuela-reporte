@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — mirror of DESIGN.md. Tailwind v4 reads `@theme` keys and
+ * generates utilities: `--color-emergency` → bg-emergency/text-emergency,
+ * `--radius-lg` → rounded-lg, `--text-h1` → text-h1, `--font-sans` → font-sans.
+ * Keep in sync with DESIGN.md; run `npx @google/design.md lint DESIGN.md`
+ * after token edits to re-verify contrast.
+ */
+@theme {
+  /* ── Report taxonomy (the 4 colors) ─────────────────────────────── */
+  --color-emergency: #d32029;
+  --color-emergency-on: #ffffff;
+  --color-emergency-text: #b3151d;
+  --color-need: #f59e0b;
+  --color-need-on: #1a1308;
+  --color-need-text: #8a5a00;
+  --color-info: #1d4ed8;
+  --color-info-on: #ffffff;
+  --color-info-text: #1740a8;
+  --color-resolved: #64748b;
+  --color-resolved-on: #ffffff;
+  --color-resolved-text: #475569;
+
+  /* ── Surfaces ───────────────────────────────────────────────────── */
+  --color-canvas: #ffffff;
+  --color-surface: #f5f7fa;
+  --color-surface-sunk: #eef1f5;
+  --color-canvas-night: #0f1722;
+  --color-hairline: #d7dde5;
+  --color-hairline-soft: #e7ebf0;
+
+  /* ── Text ───────────────────────────────────────────────────────── */
+  --color-ink: #0f1722;
+  --color-ink-soft: #384150;
+  --color-ink-muted: #5b6675;
+  --color-on-night: #f5f7fa;
+  --color-link: #1740a8;
+  --color-link-cool-1: #9cc4ff;
+
+  /* ── Semantic & sync status ─────────────────────────────────────── */
+  --color-success: #1f8f4e;
+  --color-warning: #8a5a00;
+  --color-danger: #c81e1e;
+  --color-focus-ring: #1d4ed8;
+  --color-status-offline: #8a5a00;
+  --color-status-pending: #5b6675;
+  --color-status-synced: #1f8f4e;
+
+  /* ── Typography (system-ui, zero download) ──────────────────────── */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+
+  --text-display: 32px;
+  --text-display--line-height: 1.15;
+  --text-display--font-weight: 800;
+  --text-h1: 26px;
+  --text-h1--line-height: 1.2;
+  --text-h1--font-weight: 700;
+  --text-h2: 21px;
+  --text-h2--line-height: 1.25;
+  --text-h2--font-weight: 700;
+  --text-h3: 18px;
+  --text-h3--line-height: 1.3;
+  --text-h3--font-weight: 600;
+  --text-body-lg: 18px;
+  --text-body-lg--line-height: 1.55;
+  --text-body: 16px;
+  --text-body--line-height: 1.55;
+  --text-label: 15px;
+  --text-label--line-height: 1.3;
+  --text-label--font-weight: 600;
+  --text-caption: 13px;
+  --text-caption--line-height: 1.4;
+  --text-button: 17px;
+  --text-button--line-height: 1.2;
+  --text-button--font-weight: 700;
+
+  /* ── Radius ─────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Single, never-removed focus ring — see DESIGN.md § Accessibility. */
+  :focus-visible {
+    outline: 2.5px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Honor reduced-motion globally (DESIGN.md hard rule). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
