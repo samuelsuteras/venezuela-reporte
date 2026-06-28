@@ -36,6 +36,7 @@ export interface ModReport {
   duplicateOf: string | null;
   createdAt: string;
   flagCount: number;
+  clientUuid: string;
 }
 
 interface ModRow {
@@ -52,6 +53,7 @@ interface ModRow {
   duplicate_of: string | null;
   created_at: string;
   flag_count: number;
+  client_uuid: string;
 }
 
 function toModReport(r: ModRow): ModReport {
@@ -69,6 +71,7 @@ function toModReport(r: ModRow): ModReport {
     duplicateOf: r.duplicate_of,
     createdAt: r.created_at,
     flagCount: r.flag_count ?? 0,
+    clientUuid: r.client_uuid,
   };
 }
 

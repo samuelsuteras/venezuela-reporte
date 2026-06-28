@@ -61,6 +61,13 @@ Gotchas from prior sessions. Grep before fighting a regression.
 - Serwist offline fallback: add `{ url: "/offline", revision: null }` to `precacheEntries` AND a `fallbacks.entries` matcher on `request.mode === "navigate"`.
 - `@google/design.md lint DESIGN.md` is real and useful — 0 errors = contrast/refs OK; "defined but never referenced" warnings are just spec hygiene.
 
+## Phase 4 / extraction + notes
+- LLM pool ported from market-chat: round-robin (`pickTier1`) + in-memory circuit breaker. `server-only` imports break vitest — aliased to a stub in `vitest.config.ts`.
+- Hybrid extraction: regex (cédula/phone/link, isomorphic, in `patterns.ts`) + LLM (names/addresses, `llm.ts`). Free models are sloppy → permissive zod schema, normalize after (`normalizeStrings`).
+- Client can't reach the LLM (keys server-only). Offline-first means no server in the sync path, so extraction is a fire-and-forget `POST /api/extract { kind, clientUuid }` after sync / note insert. Idempotent on `extracted_at`; `?force=1` to redo.
+- Notes are anonymous, keyed by client-generated `client_uuid`, rate-limited by the same ip_hash trigger pattern as reports (0002). Public reads go through `report_notes_public` to hide `ip_hash`.
+- Cédula is full-public via `NEXT_PUBLIC_EXTRACT_CEDULA_FULL` (default true); `maskCedula` + `applyCedulaPolicy` in feed.ts flip it to masked in one env change.
+
 ## Verification
 - **Never mask a command's exit code with `| tail`/`| head`** — the pipeline returns the pager's exit, hiding failures. Redirect to a log + `echo "EXIT=$?"`, or use `${PIPESTATUS[0]}`. (Bit us once: a failed build reported exit 0.)
 - Hydration-safe "mounted" guard: use `useSyncExternalStore(noopSubscribe, () => true, () => false)`, NOT `useEffect(()=>setState(true))` — the latter trips `react-hooks/set-state-in-effect`.

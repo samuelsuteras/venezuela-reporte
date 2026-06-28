@@ -106,6 +106,22 @@ const es = {
   "detail.flagThanks": "Gracias. Un moderador lo revisará.",
   "detail.flagError": "No se pudo enviar. Intenta más tarde.",
 
+  "detail.extracted": "Datos detectados",
+  "extracted.names": "Nombres",
+  "extracted.cedula": "Cédula",
+  "extracted.phones": "Teléfonos",
+  "extracted.addresses": "Direcciones",
+  "extracted.links": "Enlaces",
+
+  "notes.heading": "Notas",
+  "notes.placeholder": "Añade información: enlaces, contactos, detalles…",
+  "notes.submit": "Publicar nota",
+  "notes.empty": "Sin notas todavía.",
+  "notes.posting": "Publicando…",
+  "notes.posted": "Nota publicada.",
+  "notes.error": "No se pudo publicar. Intenta de nuevo.",
+  "notes.tooLong": "Máximo 1000 caracteres.",
+
   "flag.inappropriate": "Inapropiado o falso",
   "flag.spam": "Spam",
   "flag.duplicate": "Duplicado",
@@ -138,6 +154,7 @@ const es = {
   "admin.findDup": "Buscar duplicados",
   "admin.dupNone": "Sin duplicados.",
   "admin.dupPrompt": "Marcar este reporte como duplicado de:",
+  "admin.reExtract": "Re-extraer",
 
   "offlinePage.title": "Sin conexión",
   "offlinePage.body":
@@ -247,6 +264,22 @@ const en: Record<keyof typeof es, string> = {
   "detail.flagThanks": "Thanks. A moderator will review it.",
   "detail.flagError": "Couldn't send. Try again later.",
 
+  "detail.extracted": "Detected data",
+  "extracted.names": "Names",
+  "extracted.cedula": "ID (cédula)",
+  "extracted.phones": "Phones",
+  "extracted.addresses": "Addresses",
+  "extracted.links": "Links",
+
+  "notes.heading": "Notes",
+  "notes.placeholder": "Add info: links, contacts, details…",
+  "notes.submit": "Post note",
+  "notes.empty": "No notes yet.",
+  "notes.posting": "Posting…",
+  "notes.posted": "Note posted.",
+  "notes.error": "Couldn't post. Try again.",
+  "notes.tooLong": "Max 1000 characters.",
+
   "flag.inappropriate": "Inappropriate or false",
   "flag.spam": "Spam",
   "flag.duplicate": "Duplicate",
@@ -279,6 +312,7 @@ const en: Record<keyof typeof es, string> = {
   "admin.findDup": "Find duplicates",
   "admin.dupNone": "No duplicates.",
   "admin.dupPrompt": "Mark this report as a duplicate of:",
+  "admin.reExtract": "Re-extract",
 
   "offlinePage.title": "Offline",
   "offlinePage.body":
