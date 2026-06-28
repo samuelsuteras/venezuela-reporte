@@ -126,7 +126,9 @@ export function ModerationRow({
           busy={busy}
           onClick={() =>
             act(async () => {
-              const { data: { session } } = await getSupabase()!.auth.getSession();
+              const supabase = getSupabase();
+              if (!supabase) return; // admin requires Supabase; degrade quietly if unconfigured
+              const { data: { session } } = await supabase.auth.getSession();
               await fetch("/api/extract?force=1", {
                 method: "POST",
                 headers: {

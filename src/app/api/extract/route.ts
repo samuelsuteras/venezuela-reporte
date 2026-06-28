@@ -44,8 +44,8 @@ export async function POST(req: Request): Promise<Response> {
   if (forceRequested) {
     const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     if (!token) return new Response("forbidden", { status: 403 });
-    const { data: { user } } = await admin.auth.getUser(token);
-    if (!user) return new Response("forbidden", { status: 403 });
+    const { data: { user }, error: authErr } = await admin.auth.getUser(token);
+    if (authErr || !user) return new Response("forbidden", { status: 403 });
     const { data: modRow } = await admin
       .from("moderators")
       .select("user_id")
