@@ -38,7 +38,14 @@ export async function addNote(reportId: string, body: string): Promise<void> {
   }).catch(() => { /* best-effort */ });
 }
 
-/** Live list of visible notes for a report (initial fetch + Realtime refetch). */
+/**
+ * Live list of visible notes for a report: initial fetch from
+ * `report_notes_public` (oldest first) + a Realtime refetch on any change to
+ * this report's notes. Cleans up the channel and guards setState on unmount.
+ * @param reportId the report whose notes to watch.
+ * @returns the notes, `undefined` while the first fetch is in flight, or `[]`
+ *   when Supabase isn't configured (or the report genuinely has none).
+ */
 export function useNotes(reportId: string): PublicNote[] | undefined {
   const [notes, setNotes] = useState<PublicNote[] | undefined>(undefined);
   useEffect(() => {
