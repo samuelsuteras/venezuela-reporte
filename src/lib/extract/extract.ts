@@ -1,3 +1,4 @@
+import "server-only";
 import { extractRegex } from "./patterns";
 import { extractFuzzy } from "./llm";
 import type { Extracted } from "./types";

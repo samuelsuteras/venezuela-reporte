@@ -4,6 +4,7 @@
  * (names/addresses) are the LLM's job (see llm.ts). All return normalized,
  * de-duplicated arrays.
  */
+import { emptyExtracted, type Extracted } from "./types";
 
 // Cédula / RIF: optional prefix V/E/J/P/G, optional separators, 6–9 digits.
 const CEDULA_RE = /\b([VEJPGvejpg])[-\s.]?(\d{1,2}(?:[.\s]?\d{3}){1,2}|\d{6,9})\b/g;
@@ -45,8 +46,6 @@ export function extractLinks(text: string): string[] {
   }
   return [...out];
 }
-
-import { emptyExtracted, type Extracted } from "./types";
 
 /** Regex-only extraction (browser-safe — no LLM). cédula/phone/link only. */
 export function extractRegex(text: string): Extracted {
