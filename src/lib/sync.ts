@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { getSupabase, isSupabaseConfigured, REPORT_IMAGES_BUCKET } from "./supabase";
-import { log, logError } from "./log";
+import { describeError, log, logError } from "./log";
 import type { OutboxReport } from "./types";
 
 /** Custom event fired after one or more reports sync — SyncToast listens. */
@@ -17,14 +17,9 @@ let flushing = false;
  * when Supabase isn't configured, when offline, or when already running.
  */
 export async function flushOutbox(): Promise<void> {
-  if (flushing) {
-    log("sync", "skip: already flushing");
-    return;
-  }
-  if (typeof navigator !== "undefined" && !navigator.onLine) {
-    log("sync", "skip: offline (navigator.onLine === false)");
-    return;
-  }
+  // Quiet skips (no remote log spam from the 30s timer).
+  if (flushing) return;
+  if (typeof navigator !== "undefined" && !navigator.onLine) return;
 
   const supabase = getSupabase();
   if (!supabase) {
@@ -49,6 +44,7 @@ export async function flushOutbox(): Promise<void> {
       .where("status")
       .anyOf("pending", "error", "syncing")
       .sortBy("createdAt");
+    if (queued.length === 0) return; // nothing to do — stay quiet
     log("sync", `flushing ${queued.length} queued report(s)`);
 
     for (const report of queued) {
@@ -131,7 +127,7 @@ async function syncOne(
     log("sync", "synced", report.clientUuid);
     return true;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = describeError(err);
     logError("sync", "failed", report.clientUuid, message, err);
     await db.outbox.update(report.clientUuid, { status: "error", error: message });
     return false;
