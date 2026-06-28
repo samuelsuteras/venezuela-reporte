@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { TypePin } from "@/components/atoms/type-pin";
+import { BackButton } from "@/components/atoms/back-button";
+import { LocationLinks } from "@/components/molecules/location-links";
+import { CallButton } from "@/components/molecules/call-button";
 import { ReportActions } from "@/components/organisms/report/report-actions";
 import { REPORT_TYPES } from "@/lib/report-types";
 import { formatRelative } from "@/lib/format";
@@ -49,6 +52,7 @@ export function ReportDetailView({ id }: { id: string }) {
   const meta = REPORT_TYPES[report.type];
   return (
     <article>
+      <BackButton />
       <div className="flex items-center gap-2">
         <TypePin type={report.type} />
         <span className={`text-label ${meta.text}`}>{t(meta.labelKey)}</span>
@@ -88,10 +92,15 @@ export function ReportDetailView({ id }: { id: string }) {
       )}
 
       {report.lat != null && report.lng != null && (
-        <p className="mt-4 text-body text-ink-soft">
-          📍 {report.lat.toFixed(4)}, {report.lng.toFixed(4)}
-        </p>
+        <>
+          <p className="mt-4 text-body text-ink-soft">
+            📍 {report.lat.toFixed(4)}, {report.lng.toFixed(4)}
+          </p>
+          <LocationLinks lat={report.lat} lng={report.lng} />
+        </>
       )}
+
+      {report.contactPhone && <CallButton phone={report.contactPhone} />}
 
       <ReportActions reportId={report.id} />
     </article>

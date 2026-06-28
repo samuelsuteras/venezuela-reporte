@@ -60,6 +60,16 @@ export const REPORT_TYPES: Record<ReportType, ReportTypeMeta> = {
     text: "text-resolved-text",
     accent: "border-l-resolved",
   },
+  pet: {
+    key: "pet",
+    labelKey: "type.pet.label",
+    descKey: "type.pet.desc",
+    icon: "🐾",
+    fill: "bg-pet",
+    on: "text-pet-on",
+    text: "text-pet-text",
+    accent: "border-l-pet",
+  },
 };
 
 /** Stable display order (severity-first). */
@@ -67,5 +77,6 @@ export const REPORT_TYPE_ORDER: ReportType[] = [
   "emergency",
   "need",
   "info",
+  "pet",
   "resolved",
 ];

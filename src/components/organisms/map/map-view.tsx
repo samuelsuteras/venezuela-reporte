@@ -160,6 +160,8 @@ export function MapView() {
               "#1d4ed8",
               "resolved",
               "#64748b",
+              "pet",
+              "#7c3aed",
               "#64748b",
             ],
             "circle-radius": 8,

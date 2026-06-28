@@ -13,10 +13,13 @@ _No abras un issue público para problemas de seguridad. Escribe al equipo._
 
 ## Scope highlights
 
-- **`contact_phone` is never public.** It's stored on `reports` but excluded
-  from the `reports_public` view (anon-readable). The moderator view
-  `reports_moderation` is `security_invoker`, so only allowlisted moderators
-  (RLS-enforced) can read it. Report any path that exposes a phone number.
+- **`contact_phone` is opt-in public.** A reporter who enters a phone has it
+  shown on their published/resolved report (with a call button) — exposed
+  intentionally through the `reports_public` view so people can reach them in a
+  crisis. Direct anon `SELECT` of the column on the base `reports` table is
+  revoked, so it's readable ONLY via that view (and the moderator view). Report
+  any path that exposes a phone on a hidden (flagged/removed/merged) report, or
+  any other column of the base table to anon.
 - **RLS is the security boundary**, not the UI. Anonymous users may only INSERT
   reports (forced `published`) and flags. All moderator actions
   (resolve/remove/restore/merge) require an authenticated user in the

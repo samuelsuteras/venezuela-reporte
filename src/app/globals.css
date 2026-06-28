@@ -21,6 +21,9 @@
   --color-resolved: #64748b;
   --color-resolved-on: #ffffff;
   --color-resolved-text: #475569;
+  --color-pet: #7c3aed;
+  --color-pet-on: #ffffff;
+  --color-pet-text: #6d28d9;
 
   /* ── Surfaces ───────────────────────────────────────────────────── */
   --color-canvas: #ffffff;

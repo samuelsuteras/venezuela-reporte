@@ -15,6 +15,7 @@ export interface PublicReport {
   status: "published" | "resolved";
   imagePaths: string[];
   createdAt: string;
+  contactPhone: string | null;
 }
 
 interface PublicRow {
@@ -28,10 +29,11 @@ interface PublicRow {
   status: "published" | "resolved";
   image_paths: string[];
   created_at: string;
+  contact_phone: string | null;
 }
 
 const COLUMNS =
-  "id,type,title,description,lat,lng,address_text,status,image_paths,created_at";
+  "id,type,title,description,lat,lng,address_text,status,image_paths,created_at,contact_phone";
 
 function toReport(r: PublicRow): PublicReport {
   return {
@@ -45,6 +47,7 @@ function toReport(r: PublicRow): PublicReport {
     status: r.status,
     imagePaths: r.image_paths ?? [],
     createdAt: r.created_at,
+    contactPhone: r.contact_phone,
   };
 }
 

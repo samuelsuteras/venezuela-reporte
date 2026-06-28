@@ -2,7 +2,7 @@
  * `supabase/migrations/0001_init.sql` and the taxonomy in DESIGN.md. */
 
 /** The 4-color taxonomy (DESIGN.md). Stored as the report's `type`. */
-export type ReportType = "emergency" | "need" | "info" | "resolved";
+export type ReportType = "emergency" | "need" | "info" | "resolved" | "pet";
 
 /** Local sync lifecycle of a queued report (IndexedDB outbox). Distinct from
  * the server-side moderation `status` (pending/verified/flagged/resolved). */

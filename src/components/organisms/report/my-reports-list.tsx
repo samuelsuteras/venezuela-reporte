@@ -51,7 +51,9 @@ export function MyReportsList() {
       <ul className="space-y-3">
         {reports.map((r) => (
           <li key={r.clientUuid}>
-            <ReportCard report={r} />
+            <Link href={`/mis-reportes/${r.clientUuid}`} className="block">
+              <ReportCard report={r} />
+            </Link>
           </li>
         ))}
       </ul>
