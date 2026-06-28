@@ -45,3 +45,10 @@ export function extractLinks(text: string): string[] {
   }
   return [...out];
 }
+
+import { emptyExtracted, type Extracted } from "./types";
+
+/** Regex-only extraction (browser-safe — no LLM). cédula/phone/link only. */
+export function extractRegex(text: string): Extracted {
+  return { ...emptyExtracted(), cedulas: extractCedulas(text), phones: extractPhones(text), links: extractLinks(text) };
+}
