@@ -40,6 +40,10 @@ export function ReportCard({ report }: { report: OutboxReport }) {
         {report.lat != null && <span>· 📍</span>}
         {report.images.length > 0 && <span>· 📷 {report.images.length}</span>}
       </div>
+
+      {report.status === "error" && report.error && (
+        <p className="mt-2 text-caption text-danger">{report.error}</p>
+      )}
     </article>
   );
 }

@@ -29,11 +29,26 @@ export function LocationPicker({
   const [geoError, setGeoError] = useState<string>();
   const hasCoords = value.lat != null && value.lng != null;
 
-  function useMyLocation() {
+  async function requestLocation() {
     if (!("geolocation" in navigator)) {
       setGeoError(t("report.geoUnsupported"));
       return;
     }
+    // If permission was already denied, the browser will NOT show a prompt
+    // again — getCurrentPosition fails silently-ish. Detect it and tell the
+    // user how to re-enable instead of looping on a generic error.
+    try {
+      const status = await navigator.permissions?.query({
+        name: "geolocation" as PermissionName,
+      });
+      if (status?.state === "denied") {
+        setGeoError(t("report.geoDenied"));
+        return;
+      }
+    } catch {
+      // Permissions API unavailable (older browsers) — fall through to prompt.
+    }
+
     setLocating(true);
     setGeoError(undefined);
     navigator.geolocation.getCurrentPosition(
@@ -45,8 +60,12 @@ export function LocationPicker({
         });
         setLocating(false);
       },
-      () => {
-        setGeoError(t("report.geoFail"));
+      (err) => {
+        setGeoError(
+          err.code === err.PERMISSION_DENIED
+            ? t("report.geoDenied")
+            : t("report.geoFail"),
+        );
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
@@ -60,7 +79,7 @@ export function LocationPicker({
       <div className="mt-1 flex flex-wrap items-center gap-3">
         <Button
           variant="secondary"
-          onClick={useMyLocation}
+          onClick={() => void requestLocation()}
           disabled={locating}
           aria-busy={locating}
         >

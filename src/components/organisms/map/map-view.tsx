@@ -22,6 +22,7 @@ import {
   getMapStyle,
   HAS_BASEMAP,
 } from "@/lib/map-style";
+import { log, logError } from "@/lib/log";
 import type { ReportType } from "@/lib/types";
 
 const SOURCE_ID = "reports";
@@ -82,6 +83,7 @@ export function MapView() {
       ]);
       if (disposed) return;
       maplibregl.addProtocol("pmtiles", new Protocol().tile);
+      log("map", "init", { hasBasemap: HAS_BASEMAP });
 
       map = new maplibregl.Map({
         container: el,
@@ -90,6 +92,9 @@ export function MapView() {
         zoom: DEFAULT_ZOOM,
       });
       mapRef.current = map;
+      map.on("error", (e) =>
+        logError("map", e.error?.message ?? String(e.error ?? "unknown")),
+      );
       map.addControl(
         new maplibregl.NavigationControl({ showCompass: false }),
         "top-right",
@@ -104,6 +109,8 @@ export function MapView() {
 
       map.on("load", () => {
         if (!map) return;
+        log("map", "loaded");
+        map.resize(); // guard against a 0-height first layout
         map.addSource(SOURCE_ID, {
           type: "geojson",
           data: toFeatureCollection([], selectedRef.current),

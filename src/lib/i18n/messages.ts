@@ -65,11 +65,16 @@ const es = {
   "report.errSave": "No se pudo guardar. Intenta de nuevo.",
   "report.geoUnsupported": "Tu dispositivo no permite ubicación.",
   "report.geoFail": "No se pudo obtener tu ubicación. Escribe la dirección.",
+  "report.geoDenied":
+    "Bloqueaste el permiso de ubicación. Actívalo en los ajustes del navegador (toca el ícono de candado junto a la dirección) o escribe la dirección abajo.",
 
   "mine.heading": "Mis reportes",
   "mine.subtitle": "Guardados en este teléfono. El estado muestra si ya se enviaron.",
   "mine.empty": "Aún no has hecho reportes.",
   "mine.create": "＋ Crear reporte",
+  "mine.notConfigured":
+    "El servidor no está configurado: tus reportes se guardan aquí pero no se enviarán todavía.",
+  "mine.retry": "Reintentar envío",
 
   "status.pending": "En cola",
   "status.syncing": "Enviando",
@@ -191,11 +196,16 @@ const en: Record<keyof typeof es, string> = {
   "report.errSave": "Couldn't save. Try again.",
   "report.geoUnsupported": "Your device doesn't allow location.",
   "report.geoFail": "Couldn't get your location. Type the address.",
+  "report.geoDenied":
+    "You blocked the location permission. Enable it in your browser settings (tap the lock icon next to the address) or type the address below.",
 
   "mine.heading": "My reports",
   "mine.subtitle": "Saved on this phone. The status shows whether they've been sent.",
   "mine.empty": "You haven't made any reports yet.",
   "mine.create": "＋ Create report",
+  "mine.notConfigured":
+    "The server isn't configured: your reports are saved here but won't send yet.",
+  "mine.retry": "Retry sending",
 
   "status.pending": "Queued",
   "status.syncing": "Sending",

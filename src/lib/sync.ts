@@ -1,5 +1,6 @@
 import { db } from "./db";
-import { getSupabase, REPORT_IMAGES_BUCKET } from "./supabase";
+import { getSupabase, isSupabaseConfigured, REPORT_IMAGES_BUCKET } from "./supabase";
+import { log, logError } from "./log";
 import type { OutboxReport } from "./types";
 
 /** Custom event fired after one or more reports sync — SyncToast listens. */
@@ -16,11 +17,27 @@ let flushing = false;
  * when Supabase isn't configured, when offline, or when already running.
  */
 export async function flushOutbox(): Promise<void> {
-  if (flushing) return;
-  if (typeof navigator !== "undefined" && !navigator.onLine) return;
+  if (flushing) {
+    log("sync", "skip: already flushing");
+    return;
+  }
+  if (typeof navigator !== "undefined" && !navigator.onLine) {
+    log("sync", "skip: offline (navigator.onLine === false)");
+    return;
+  }
 
   const supabase = getSupabase();
-  if (!supabase) return; // not configured → leave reports queued
+  if (!supabase) {
+    // The single most common cause of a stuck "en espera" report: the public
+    // Supabase env vars aren't present in this build/runtime.
+    logError(
+      "sync",
+      "Supabase NOT configured — reports stay queued.",
+      "Check NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are set AND the app was rebuilt after setting them (these are inlined at build time).",
+      { isSupabaseConfigured },
+    );
+    return;
+  }
 
   flushing = true;
   let syncedCount = 0;
@@ -29,11 +46,13 @@ export async function flushOutbox(): Promise<void> {
       .where("status")
       .anyOf("pending", "error")
       .sortBy("createdAt");
+    log("sync", `flushing ${queued.length} queued report(s)`);
 
     for (const report of queued) {
       const ok = await syncOne(supabase, report);
       if (ok) syncedCount++;
     }
+    log("sync", `done: ${syncedCount}/${queued.length} synced`);
   } finally {
     flushing = false;
   }
@@ -106,12 +125,12 @@ async function syncOne(
       remoteId: data?.id as string | undefined,
       error: undefined,
     });
+    log("sync", "synced", report.clientUuid);
     return true;
   } catch (err) {
-    await db.outbox.update(report.clientUuid, {
-      status: "error",
-      error: err instanceof Error ? err.message : String(err),
-    });
+    const message = err instanceof Error ? err.message : String(err);
+    logError("sync", "failed", report.clientUuid, message, err);
+    await db.outbox.update(report.clientUuid, { status: "error", error: message });
     return false;
   }
 }
