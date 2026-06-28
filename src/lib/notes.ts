@@ -50,7 +50,12 @@ export function useNotes(reportId: string): PublicNote[] | undefined {
   const [notes, setNotes] = useState<PublicNote[] | undefined>(undefined);
   useEffect(() => {
     const supabase = getSupabase();
-    if (!supabase) { setNotes([]); return; }
+    if (!supabase) {
+      // Defer so setState is not called synchronously in the effect body
+      // (avoids react-hooks/set-state-in-effect cascade-render lint error).
+      void Promise.resolve().then(() => setNotes([]));
+      return;
+    }
     let active = true;
     const load = () =>
       supabase

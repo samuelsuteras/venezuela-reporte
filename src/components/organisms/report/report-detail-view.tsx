@@ -7,6 +7,8 @@ import { LocationLinks } from "@/components/molecules/location-links";
 import { CallButton } from "@/components/molecules/call-button";
 import { ImageGallery } from "@/components/molecules/image-gallery";
 import { ReportActions } from "@/components/organisms/report/report-actions";
+import { ReportNotes } from "@/components/organisms/report/report-notes";
+import { ExtractedChips } from "@/components/molecules/extracted-chips";
 import { REPORT_TYPES } from "@/lib/report-types";
 import { formatRelative } from "@/lib/format";
 import { fetchReportById, reportImageUrl, type PublicReport } from "@/lib/feed";
@@ -75,6 +77,8 @@ export function ReportDetailView({ id }: { id: string }) {
         </p>
       )}
 
+      <ExtractedChips extracted={report.extracted} />
+
       {report.imagePaths.length > 0 && (
         <ImageGallery
           urls={report.imagePaths
@@ -95,6 +99,7 @@ export function ReportDetailView({ id }: { id: string }) {
       {report.contactPhone && <CallButton phone={report.contactPhone} />}
 
       <ReportActions reportId={report.id} />
+      <ReportNotes reportId={report.id} />
     </article>
   );
 }
