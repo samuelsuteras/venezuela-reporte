@@ -5,6 +5,7 @@ import { TypePin } from "@/components/atoms/type-pin";
 import { BackButton } from "@/components/atoms/back-button";
 import { LocationLinks } from "@/components/molecules/location-links";
 import { CallButton } from "@/components/molecules/call-button";
+import { ImageGallery } from "@/components/molecules/image-gallery";
 import { ReportActions } from "@/components/organisms/report/report-actions";
 import { REPORT_TYPES } from "@/lib/report-types";
 import { formatRelative } from "@/lib/format";
@@ -75,20 +76,11 @@ export function ReportDetailView({ id }: { id: string }) {
       )}
 
       {report.imagePaths.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {report.imagePaths.map((path, i) => {
-            const url = reportImageUrl(path);
-            return url ? (
-              // eslint-disable-next-line @next/next/no-img-element -- remote Supabase asset
-              <img
-                key={path}
-                src={url}
-                alt={t("detail.photoAlt", { n: i + 1 })}
-                className="aspect-square w-full rounded-md object-cover"
-              />
-            ) : null;
-          })}
-        </div>
+        <ImageGallery
+          urls={report.imagePaths
+            .map((p) => reportImageUrl(p))
+            .filter((u): u is string => !!u)}
+        />
       )}
 
       {report.lat != null && report.lng != null && (

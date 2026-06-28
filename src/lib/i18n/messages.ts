@@ -17,6 +17,7 @@ const es = {
   "common.new": "＋ Nuevo",
   "common.loading": "Cargando…",
   "common.seeMore": "Ver más",
+  "common.close": "Cerrar",
 
   "locale.switch": "English",
   "locale.switchAria": "Cambiar idioma a inglés",
@@ -95,6 +96,7 @@ const es = {
   "detail.resolved": "✓ Resuelto",
   "detail.notFound": "No se encontró el reporte.",
   "detail.photoAlt": "Foto {n}",
+  "detail.viewPhoto": "Ver foto {n} en grande",
   "detail.directions": "Cómo llegar",
   "maps.google": "Google Maps",
   "maps.waze": "Waze",
@@ -156,6 +158,7 @@ const en: Record<keyof typeof es, string> = {
   "common.new": "＋ New",
   "common.loading": "Loading…",
   "common.seeMore": "See more",
+  "common.close": "Close",
 
   "locale.switch": "Español",
   "locale.switchAria": "Switch language to Spanish",
@@ -234,6 +237,7 @@ const en: Record<keyof typeof es, string> = {
   "detail.resolved": "✓ Resolved",
   "detail.notFound": "Report not found.",
   "detail.photoAlt": "Photo {n}",
+  "detail.viewPhoto": "View photo {n} larger",
   "detail.directions": "Get directions",
   "maps.google": "Google Maps",
   "maps.waze": "Waze",

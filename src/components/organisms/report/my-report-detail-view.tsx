@@ -8,6 +8,7 @@ import { BackButton } from "@/components/atoms/back-button";
 import { StatusBadge } from "@/components/atoms/status-badge";
 import { LocationLinks } from "@/components/molecules/location-links";
 import { CallButton } from "@/components/molecules/call-button";
+import { ImageGallery } from "@/components/molecules/image-gallery";
 import { REPORT_TYPES } from "@/lib/report-types";
 import { formatRelative } from "@/lib/format";
 import { useLocale, useT } from "@/lib/i18n/client";
@@ -73,19 +74,7 @@ export function MyReportDetailView({ id }: { id: string }) {
         </p>
       )}
 
-      {urls.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-2">
-          {urls.map((u, i) => (
-            // eslint-disable-next-line @next/next/no-img-element -- local blob preview
-            <img
-              key={u}
-              src={u}
-              alt={t("detail.photoAlt", { n: i + 1 })}
-              className="aspect-square w-full rounded-md object-cover"
-            />
-          ))}
-        </div>
-      )}
+      {urls.length > 0 && <ImageGallery urls={urls} />}
 
       {report.lat != null && report.lng != null && (
         <>
