@@ -6,6 +6,23 @@ import type { OutboxReport } from "./types";
 /** Custom event fired after one or more reports sync — SyncToast listens. */
 export const SYNCED_EVENT = "reporteve:synced";
 
+/**
+ * Ask the server to extract structured data for a freshly-synced report.
+ * Fire-and-forget: the client can't call the LLM (keys are server-only), and
+ * extraction is best-effort — a failure never affects the report. The route is
+ * idempotent, so calling once per first-sync is enough.
+ *
+ * @param clientUuid - The `client_uuid` of the report row that was just upserted.
+ */
+function pingExtract(clientUuid: string): void {
+  if (typeof window === "undefined") return;
+  void fetch("/api/extract", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ kind: "report", clientUuid }),
+  }).catch(() => { /* best-effort */ });
+}
+
 // ponytail: module-level guard, single-tab assumption. If we ever need
 // cross-tab coordination, move to a Web Lock (navigator.locks).
 let flushing = false;
@@ -124,6 +141,7 @@ async function syncOne(
       error: undefined,
     });
     log("sync", "synced", report.clientUuid);
+    pingExtract(report.clientUuid);
     return true;
   } catch (err) {
     const message = describeError(err);
