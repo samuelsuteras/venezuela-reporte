@@ -141,8 +141,7 @@ export function ReportFeed() {
 
       {/* ── National hub section ── */}
       <section aria-label={t("feed.hubSection")} className="mt-8">
-        <h2 className="mb-3 text-h3 text-ink-soft flex items-center gap-2">
-          <span aria-hidden="true">🌐</span>
+        <h2 className="mb-3 text-h3 text-ink-soft">
           {t("feed.hubSection")}
         </h2>
 
