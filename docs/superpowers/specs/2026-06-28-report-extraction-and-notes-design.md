@@ -17,7 +17,7 @@ Both serve one outcome: turn unstructured crisis text into organized, actionable
 |---|---|
 | Note authors | **Anonymous** (anyone), like reports. Anti-spam via the existing `ip_hash` rate-limit trigger. |
 | Extracted-field visibility | **Public** — shown as chips on the public report. |
-| Cédula display | Stored full (mod search); rendered **masked** publicly (`V-12.3##.###`) with an opt-in reveal. Single config flag flips to full-public. |
+| Cédula display | **Full public from day one** (`EXTRACT_CEDULA_PUBLIC_FULL=true` default). Masking code kept behind the flag for one-flip reversibility if exposure ever becomes a problem. |
 | LLM providers | Groq (primary), Gemini Flash, OpenRouter `:free`, Cerebras — round-robin, circuit-broken. |
 | Extraction strategy | **Hybrid** — regex for cédula/phone/link (deterministic, free, offline-capable); LLM for names/address. |
 
@@ -181,7 +181,7 @@ CEREBRAS_API_KEY=
 GOOGLE_GENERATIVE_AI_API_KEY=
 OPENROUTER_API_KEY=
 OPENROUTER_MODEL=            # default a :free id
-EXTRACT_CEDULA_PUBLIC_FULL=false
+EXTRACT_CEDULA_PUBLIC_FULL=true   # full cédula public from day one; set false to mask
 SUPABASE_SERVICE_ROLE_KEY=   # server-only, for /api/extract write-back
 ```
 No keys at all ⇒ regex-only extraction; everything still works.
