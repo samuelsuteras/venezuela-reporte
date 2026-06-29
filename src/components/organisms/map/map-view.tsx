@@ -31,8 +31,8 @@ const SOURCE_ID = "reports";
 /**
  * Build a GeoJSON FeatureCollection from local + hub reports, filtered by the
  * active type set. Only reports with coordinates are included (enforced by both
- * fetch calls). The `source` property on each feature lets the click handler
- * distinguish hub markers (no local detail page) from local ones.
+ * fetch calls). Local and hub markers carry the same `id` property — both open
+ * the detail page on click.
  */
 function toFeatureCollection(
   reports: PublicReport[],
@@ -49,7 +49,6 @@ function toFeatureCollection(
           id: r.id,
           type: r.type,
           title: r.title,
-          source: r.source ?? "local",
         },
       })),
   };
@@ -64,10 +63,10 @@ function toFeatureCollection(
  *   - Local Supabase (real-time subscription)
  *   - Venezuela-ayuda national hub (polled once on mount; no real-time)
  *
- * Hub markers are displayed identically to local ones but clicking them does
- * NOT navigate to a local detail page (their UUIDs belong to the hub's DB).
- * The list/feed is the accessible equivalent — keyboard users reach reports
- * there (DESIGN.md § Accessibility).
+ * Hub markers are displayed identically to local ones and clicking either opens
+ * the report detail page (hub ids resolve there via a hub fallback fetch). The
+ * list/feed is the accessible equivalent — keyboard users reach reports there
+ * (DESIGN.md § Accessibility).
  *
  * @client-component Owns map lifecycle, report refs, and filter state.
  */
@@ -219,12 +218,10 @@ export function MapView() {
         });
 
         map.on("click", "points", (e) => {
-          const props = e.features?.[0]?.properties;
-          const id = props?.id as string | undefined;
-          const reportSource = props?.source as string | undefined;
-          // Hub report UUIDs belong to the hub's database — navigating to a
-          // local detail page would 404. Skip navigation for hub markers.
-          if (id && reportSource !== "hub") router.push(`/reportes/${id}`);
+          const id = e.features?.[0]?.properties?.id as string | undefined;
+          // Both local and hub markers open the detail page; hub ids resolve
+          // there via a hub fallback fetch.
+          if (id) router.push(`/reportes/${id}`);
         });
 
         for (const layer of ["clusters", "points"]) {

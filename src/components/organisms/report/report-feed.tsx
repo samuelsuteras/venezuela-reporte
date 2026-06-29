@@ -15,6 +15,9 @@ import type { ReportType } from "@/lib/types";
 const PAGE = 20;
 /** Hub section fetches at most this many reports per type (5 types × 20 = 100 max). */
 const HUB_LIMIT = 20;
+/** Hub cards shown per "Ver más" step. The pool is fetched once, sorted
+ * newest-first (see fetchHubReports), and revealed client-side in slices. */
+const HUB_PAGE = 10;
 
 /**
  * Public discovery feed: newest-first list of verified reports with type
@@ -35,6 +38,8 @@ export function ReportFeed() {
 
   // Hub section state: null = loading, [] = empty/error, [...] = loaded.
   const [hubReports, setHubReports] = useState<PublicReport[] | null>(null);
+  // How many hub cards are revealed (client-side pagination over the pool).
+  const [hubVisible, setHubVisible] = useState(HUB_PAGE);
 
   // Monotonic request token — only the latest fetch may commit, so rapid filter
   // toggles / realtime pings can't race. setState runs only after the await
@@ -156,11 +161,23 @@ export function ReportFeed() {
             {t("feed.hubEmpty")}
           </p>
         ) : (
-          <div className="space-y-3">
-            {hubReports.map((r) => (
-              <PublicReportCard key={r.id} report={r} />
-            ))}
-          </div>
+          <>
+            <div className="space-y-3">
+              {hubReports.slice(0, hubVisible).map((r) => (
+                <PublicReportCard key={r.id} report={r} />
+              ))}
+            </div>
+            {hubVisible < hubReports.length && (
+              <div className="mt-4 flex justify-center">
+                <Button
+                  variant="secondary"
+                  onClick={() => setHubVisible((v) => v + HUB_PAGE)}
+                >
+                  {t("common.seeMore")}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </section>
     </div>

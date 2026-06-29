@@ -163,8 +163,31 @@ export async function fetchHubReports(opts: {
     HUB_TYPES.map((t) => fetchOneHubType(t, limit)),
   );
   const all = perType.flat();
+  // Newest first — the per-type API returns each type's own ordering, so the
+  // flattened list must be globally re-sorted. createdAt is ISO 8601, so a
+  // string compare is a valid chronological compare.
+  all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
   return opts.withCoordsOnly
     ? all.filter((r) => r.lat !== null && r.lng !== null)
     : all;
+}
+
+/**
+ * Resolve a single hub report by id for the detail view.
+ *
+ * The hub's GET /api/v1/reports/{id} endpoint omits which of the five hub types
+ * the row is, but `toPublicReport` needs that to map title + color. So instead
+ * of the by-id endpoint we refetch the recent pool (each type query knows its
+ * own type) and find the match — guaranteeing the same shape the feed/map show.
+ *
+ * ponytail: scans the recent window; a report older than `limit` per type reads
+ * as not-found. Switch to GET /api/v1/reports/{id} if its payload ever carries
+ * the hub type, or if deep-linking stale hub reports becomes a need.
+ */
+export async function fetchHubReportById(
+  id: string,
+): Promise<PublicReport | null> {
+  const all = await fetchHubReports({ limit: 100 });
+  return all.find((r) => r.id === id) ?? null;
 }

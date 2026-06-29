@@ -9,9 +9,10 @@ import { useSaveData } from "@/lib/use-save-data";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
- * A public report in the discovery feed. Local reports link to their detail
- * page. Hub reports (source === "hub") are non-navigable locally; if they carry
- * a `sourceUrl` they open the original source externally instead.
+ * A public report in the discovery feed. Every card — local or hub — links to
+ * its local detail page (`/reportes/{id}`). Hub reports resolve there via a hub
+ * fallback fetch; the detail view shows their external source link. Hub cards
+ * still carry a "Hub" badge so the origin stays visible.
  *
  * The thumbnail is dropped on data-saver/slow connections (DESIGN.md § Low-Bandwidth).
  *
@@ -71,26 +72,8 @@ export function PublicReportCard({ report }: { report: PublicReport }) {
 
   const baseClass = `flex gap-3 rounded-lg border border-hairline-soft border-l-4 bg-canvas p-4 ${meta.accent}`;
 
-  // Hub report with a source URL: link externally (new tab, rel=noopener).
-  if (isHub && report.sourceUrl) {
-    return (
-      <a
-        href={report.sourceUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={baseClass}
-      >
-        {inner}
-      </a>
-    );
-  }
-
-  // Hub report without a source URL: non-interactive card.
-  if (isHub) {
-    return <div className={baseClass}>{inner}</div>;
-  }
-
-  // Local report: link to the local detail page.
+  // All reports link to the local detail page; hub ids resolve via a hub
+  // fallback fetch in the detail view.
   return (
     <Link href={`/reportes/${report.id}`} className={baseClass}>
       {inner}

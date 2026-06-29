@@ -136,3 +136,33 @@
 - [ ] Screen-reader pass (VoiceOver/NVDA) on report form + feed + map list.
 - [ ] Deploy to Vercel + Cloudflare; verify install prompt + offline reload + EN/ES toggle in prod.
 - [ ] (Nicety) Generate PNG + Apple-touch icon set from `public/icon.svg`.
+
+---
+
+## Phase 5 — Hub reports: detail + sorted/paginated feed
+
+Goal: hub (venezuela-ayuda) reports openable in detail from /reportes + map; hub
+section sorted newest-first with pagination.
+
+- [x] `hub-feed.ts`: sort `fetchHubReports` newest-first (createdAt desc); add
+      `fetchHubReportById(id)` (scan recent pool — by-id endpoint omits hub type).
+- [x] `report-detail-view.tsx`: fall back to hub when local id not found; hide
+      ReportActions + ReportNotes for `source==="hub"` (they write Supabase by id);
+      show "Ver fuente original" external link when `sourceUrl` present.
+- [x] `public-report-card.tsx`: hub cards link internally to `/reportes/${id}`
+      (was external/non-interactive). Keep hub badge.
+- [x] `map-view.tsx`: navigate hub markers to `/reportes/${id}` (drop hub skip;
+      also dropped the now-unused `source` GeoJSON feature property).
+- [x] `report-feed.tsx`: client-slice pagination for hub section (visible + "Ver más").
+- [x] `messages.ts`: add `detail.hubSource` (es/en).
+
+### Review
+- **Verified:** `tsc --noEmit` ✅ · `pnpm lint` ✅ · `pnpm build` ✅ (16 routes, `/reportes/[id]` compiles).
+- **NOT verified (sandbox blocks port binding → no dev server / live network):** hub
+  reports actually opening in detail, the source link, map hub-marker click-through, the
+  pagination button. Needs a real browser + reachable hub API.
+- **Decisions:** kept the hub a *separate* "Hub nacional" section (faithful to the
+  request — sort+paginate within it, not merged into the local stream). Detail resolves
+  hub ids by scanning the recent hub pool, not `GET /api/v1/reports/{id}`, because that
+  payload doesn't expose which of the 5 hub types the row is (needed for title/color).
+  Pagination is client-slice over a sorted pool (HUB_PAGE=10), not hub cursor paging.

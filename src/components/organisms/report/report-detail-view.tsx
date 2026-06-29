@@ -12,6 +12,7 @@ import { ExtractedChips } from "@/components/molecules/extracted-chips";
 import { REPORT_TYPES } from "@/lib/report-types";
 import { formatRelative } from "@/lib/format";
 import { fetchReportById, reportImageUrl, type PublicReport } from "@/lib/feed";
+import { fetchHubReportById } from "@/lib/hub-feed";
 import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
@@ -19,6 +20,10 @@ import { useLocale, useT } from "@/lib/i18n/client";
  * report shows in the feed it also opens here (avoids the server/client env
  * asymmetry that made server-side fetch return "not found"). `undefined` =
  * loading, `null` = genuinely not found.
+ *
+ * Local Supabase ids are tried first; a miss falls back to the national hub so
+ * hub reports surfaced in the feed/map open here too. Hub reports live in the
+ * hub's DB, so the Supabase-backed actions (flag, notes) are hidden for them.
  */
 export function ReportDetailView({ id }: { id: string }) {
   const t = useT();
@@ -29,13 +34,13 @@ export function ReportDetailView({ id }: { id: string }) {
 
   useEffect(() => {
     let active = true;
-    fetchReportById(id)
-      .then((r) => {
-        if (active) setReport(r);
-      })
-      .catch(() => {
-        if (active) setReport(null);
-      });
+    const load = async () => {
+      const local = await fetchReportById(id).catch(() => null);
+      return local ?? (await fetchHubReportById(id).catch(() => null));
+    };
+    void load().then((r) => {
+      if (active) setReport(r);
+    });
     return () => {
       active = false;
     };
@@ -53,6 +58,7 @@ export function ReportDetailView({ id }: { id: string }) {
   }
 
   const meta = REPORT_TYPES[report.type];
+  const isHub = report.source === "hub";
   return (
     <article>
       <BackButton />
@@ -98,8 +104,25 @@ export function ReportDetailView({ id }: { id: string }) {
 
       {report.contactPhone && <CallButton phone={report.contactPhone} />}
 
-      <ReportActions reportId={report.id} />
-      <ReportNotes reportId={report.id} />
+      {/* Hub reports live in the hub's DB — link out to the original record
+          instead of our Supabase-backed flag/notes (which key on a local id). */}
+      {isHub ? (
+        report.sourceUrl && (
+          <a
+            href={report.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex min-h-11 items-center text-label text-info-text"
+          >
+            {t("detail.hubSource")} ↗
+          </a>
+        )
+      ) : (
+        <>
+          <ReportActions reportId={report.id} />
+          <ReportNotes reportId={report.id} />
+        </>
+      )}
     </article>
   );
 }

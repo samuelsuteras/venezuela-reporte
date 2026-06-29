@@ -98,6 +98,7 @@ const es = {
 
   "detail.resolved": "✓ Resuelto",
   "detail.notFound": "No se encontró el reporte.",
+  "detail.hubSource": "Ver fuente original",
   "detail.photoAlt": "Foto {n}",
   "detail.viewPhoto": "Ver foto {n} en grande",
   "detail.directions": "Cómo llegar",
@@ -259,6 +260,7 @@ const en: Record<keyof typeof es, string> = {
 
   "detail.resolved": "✓ Resolved",
   "detail.notFound": "Report not found.",
+  "detail.hubSource": "View original source",
   "detail.photoAlt": "Photo {n}",
   "detail.viewPhoto": "View photo {n} larger",
   "detail.directions": "Get directions",

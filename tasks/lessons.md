@@ -68,6 +68,9 @@ Gotchas from prior sessions. Grep before fighting a regression.
 - Notes are anonymous, keyed by client-generated `client_uuid`, rate-limited by the same ip_hash trigger pattern as reports (0002). Public reads go through `report_notes_public` to hide `ip_hash`.
 - Cédula is full-public via `NEXT_PUBLIC_EXTRACT_CEDULA_FULL` (default true); `maskCedula` + `applyCedulaPolicy` in feed.ts flip it to masked in one env change.
 
+## Sandbox / dev-smoke (agent env)
+- **Foreground `sleep` is blocked and a port-binding `next dev` gets killed (exit 144)** in the sandboxed Bash. A live dev-server + curl smoke is NOT possible here — don't burn time on it. Verify with `tsc --noEmit` + `pnpm lint` + `pnpm build` (one-shot, no port) and mark browser/network checks "needs real browser+backend", as Phases 1–4 do. To wait on readiness without `sleep`: `curl --retry N --retry-delay 1 --retry-connrefused`.
+
 ## Verification
 - **Never mask a command's exit code with `| tail`/`| head`** — the pipeline returns the pager's exit, hiding failures. Redirect to a log + `echo "EXIT=$?"`, or use `${PIPESTATUS[0]}`. (Bit us once: a failed build reported exit 0.)
 - Hydration-safe "mounted" guard: use `useSyncExternalStore(noopSubscribe, () => true, () => false)`, NOT `useEffect(()=>setState(true))` — the latter trips `react-hooks/set-state-in-effect`.
