@@ -162,7 +162,20 @@ section sorted newest-first with pagination.
   reports actually opening in detail, the source link, map hub-marker click-through, the
   pagination button. Needs a real browser + reachable hub API.
 - **Decisions:** kept the hub a *separate* "Hub nacional" section (faithful to the
-  request — sort+paginate within it, not merged into the local stream). Detail resolves
-  hub ids by scanning the recent hub pool, not `GET /api/v1/reports/{id}`, because that
-  payload doesn't expose which of the 5 hub types the row is (needed for title/color).
+  request — sort+paginate within it, not merged into the local stream).
   Pagination is client-slice over a sorted pool (HUB_PAGE=10), not hub cursor paging.
+
+### Phase 5b — map detail bug + summary popup
+- **Bug:** map→detail failed ("No se encontró") for hub markers. Cause: detail
+  resolved hub ids by scanning a recent pool (limit 100/type) but the map shows a
+  bigger window (200/type), so deeper markers missed the scan. The feed (20/type)
+  always sat inside the window, so it worked — hence "works from /reportes, not map".
+- **Fix:** `fetchHubReportById` now hits `GET /api/v1/reports/{id}` directly. Its
+  payload `{ report: { type, ... } }` carries the `type` discriminator (re-checked the
+  OpenAPI — my earlier assumption was wrong), so any hub id resolves regardless of pool.
+- **Feature:** clicking a marker now opens a MapLibre summary popup (icon+label, title,
+  description, time+place, "Ver detalle" link) instead of navigating immediately. Built
+  with `textContent` DOM nodes (hub title/desc are untrusted → no innerHTML). Works for
+  local + hub. New i18n key `map.viewDetail`.
+- **Verified:** `tsc --noEmit` ✅ · `pnpm lint` ✅ · `pnpm build` ✅. Live click-through
+  still needs a real browser (sandbox blocks the dev server).

@@ -41,6 +41,9 @@ type HubType = (typeof HUB_TYPES)[number];
  */
 interface HubRow {
   id: string;
+  /** Present only on the by-id endpoint, where it's the type discriminator.
+   * The list endpoint omits it (type is the query param there). */
+  type?: string | null;
   created_at: string;
   name?: string | null;
   message?: string | null;
@@ -176,18 +179,32 @@ export async function fetchHubReports(opts: {
 /**
  * Resolve a single hub report by id for the detail view.
  *
- * The hub's GET /api/v1/reports/{id} endpoint omits which of the five hub types
- * the row is, but `toPublicReport` needs that to map title + color. So instead
- * of the by-id endpoint we refetch the recent pool (each type query knows its
- * own type) and find the match — guaranteeing the same shape the feed/map show.
- *
- * ponytail: scans the recent window; a report older than `limit` per type reads
- * as not-found. Switch to GET /api/v1/reports/{id} if its payload ever carries
- * the hub type, or if deep-linking stale hub reports becomes a need.
+ * Uses the hub's GET /api/v1/reports/{id} endpoint, whose payload is
+ * `{ report: { type, ... } }` — `type` is the discriminator `toPublicReport`
+ * needs to map title + color. This resolves any hub report regardless of how
+ * deep it sits in any list window (the reason a scan-the-pool approach missed
+ * markers the map showed but the recent feed pool didn't). Returns null on any
+ * miss/parse/network error; the detail view then shows "not found".
  */
 export async function fetchHubReportById(
   id: string,
 ): Promise<PublicReport | null> {
-  const all = await fetchHubReports({ limit: 100 });
-  return all.find((r) => r.id === id) ?? null;
+  try {
+    const url = new URL(`/api/v1/reports/${encodeURIComponent(id)}`, HUB_BASE);
+    const res = await fetch(url.toString(), {
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!res.ok) return null;
+
+    const data = (await res.json()) as { report?: HubRow };
+    const r = data.report;
+    if (!r?.id) return null;
+
+    const hubType = (HUB_TYPES as readonly string[]).includes(r.type ?? "")
+      ? (r.type as HubType)
+      : null;
+    return hubType ? toPublicReport(hubType, r) : null;
+  } catch {
+    return null;
+  }
 }
